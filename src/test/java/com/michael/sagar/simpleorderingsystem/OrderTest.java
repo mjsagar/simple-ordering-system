@@ -159,4 +159,34 @@ public class OrderTest {
         }
     }
 
+
+    //stage 3
+    @Test
+    public void fullfil_an_order_by_id() {
+
+        //Given - An order exists
+        try {
+            //when  - A fulfil order request is submitted for a valid order reference
+            Order orderToUpdate = new Order(customer1,product1,100);
+            orderRepositoryTest.saveAndFlush(orderToUpdate);
+
+            //posting to /api/order/fulfil with JSON order details
+            ResultActions mockMvc1 = this.mockMvc.perform(post("/api/order/fulfil")
+                    // adding a JSON string to the request -  deccided to make this a JSON list of ids
+                    .content("[{\"order_id\":" + orderToUpdate.getOrderId()+"}]")
+                    .contentType(MediaType.APPLICATION_JSON));
+            mockMvc1.andDo(print()).andExpect(status().isOk());
+            // then - the order is marked as dispatched
+            mockMvc1.andExpect(jsonPath("$.orderId").value(orderToUpdate.getOrderId()));
+            // checking the new quantity is correct
+            mockMvc1.andExpect(jsonPath("$.quantity").value(150));
+
+            Order updatedOrder = orderRepositoryTest.findOne(orderToUpdate.getOrderId());
+            assert updatedOrder.getDispatched()==true;
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }
