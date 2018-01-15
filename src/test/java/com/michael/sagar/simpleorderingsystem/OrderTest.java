@@ -51,9 +51,6 @@ public class OrderTest {
     // setting up product for the customer to buy
     private Product product1;
 
-    // setting up product for the customer to buy
-    private Order order1;
-
     //Stage 1 tests
 
     @Before
@@ -86,18 +83,14 @@ public class OrderTest {
         }
     }
 
-    private void setupOrder(){
-        order1 = new Order(customer1, product1, 150);
-        orderRepositoryTest.saveAndFlush(order1);
-    }
-
     @Test
     public void order_created_requested_by_get_quantity_returned() {
 
         //Given - A customer has submitted an order for some bricks
         try {
             //when  - an order request is submitted with a valid reference
-            setupOrder();
+            Order order1 = order1 = new Order(customer1, product1, 150);
+            orderRepositoryTest.saveAndFlush(order1);
             //posting to /api/order/get with JSON order details
             ResultActions mockMvc1 = this.mockMvc.perform(get("/api/order/get/id/"+order1.getOrderId()));
             mockMvc1.andDo(print()).andExpect(status().isOk());
@@ -124,7 +117,6 @@ public class OrderTest {
         //Given - Many customer have submitted orders for bricks
         try {
             //when  - a get orders request is submitted
-            setupOrder();
             //posting to /api/order/get/all to retrive all orders
             ResultActions mockMvc1 = this.mockMvc.perform(get("/api/order/get/all"));
             mockMvc1.andDo(print()).andExpect(status().isOk());
@@ -153,7 +145,7 @@ public class OrderTest {
             //posting to /api/order/update with JSON order details
             ResultActions mockMvc1 = this.mockMvc.perform(post("/api/order/update")
                     // adding a JSON string to the request
-                    .content("{\"order_id\":" + orderToUpdate.getOrderId() + "\",\"quantity\":150}")
+                    .content("{\"order_id\":" + orderToUpdate.getOrderId() + ",\"quantity\":150}")
                     .contentType(MediaType.APPLICATION_JSON));
             mockMvc1.andDo(print()).andExpect(status().isOk());
             // then - an orderReference is returned with order reference that is unique to the submission
