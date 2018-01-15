@@ -26,7 +26,7 @@ public class Product {
     }
 
     //we want the product name to be unique so a product can be found by it
-    @Column(unique=true)
+    @Column(unique = true)
     public String getProductName() {
         return productName;
     }

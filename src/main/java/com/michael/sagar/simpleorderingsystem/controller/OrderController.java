@@ -19,8 +19,8 @@ import java.util.Map;
 
 
 @RestController
-    @RequestMapping("/api/order")
-    public class OrderController {
+@RequestMapping("/api/order")
+public class OrderController {
     @Autowired
     OrderRepository orderRepository;
     @Autowired
@@ -28,33 +28,32 @@ import java.util.Map;
     @Autowired
     ProductRepository productRepository;
 
-        @GetMapping
-        @RequestMapping("/create")
-        public ResponseEntity<Order> createOrders(@RequestBody String body) {
-            ObjectMapper mapper = new ObjectMapper();
-            try{
-            Map<String,Object> mapBody = mapper.readValue(body,Map.class);
-            Long cusId = Long.valueOf((int)mapBody.get("customer_id"));
+    @GetMapping
+    @RequestMapping("/create")
+    public ResponseEntity<Order> createOrders(@RequestBody String body) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Map<String, Object> mapBody = mapper.readValue(body, Map.class);
+            Long cusId = Long.valueOf((int) mapBody.get("customer_id"));
             Customer customer = customerRepository.findOne(cusId);
-            Product product = productRepository.findByProductName((String)mapBody.get("product_name"));
-            Order order = new Order(customer,product,(int)mapBody.get("quantity"));
+            Product product = productRepository.findByProductName((String) mapBody.get("product_name"));
+            Order order = new Order(customer, product, (int) mapBody.get("quantity"));
             orderRepository.saveAndFlush(order);
             return new ResponseEntity(order, HttpStatus.OK);
-            }
-            catch(Exception e){
-                e.printStackTrace();
-                return new ResponseEntity("error with original port", HttpStatus.EXPECTATION_FAILED);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity("error with original port", HttpStatus.EXPECTATION_FAILED);
         }
+    }
 
     @GetMapping
     @RequestMapping("/get/id/{id}")
     public ResponseEntity<Order> getOrderById(@PathVariable("id") Long id) {
-       Order order = orderRepository.findOne(id);
-       if(order!=null)
-        return new ResponseEntity(order, HttpStatus.OK);
-       else
-        return new ResponseEntity("order with id :"+id+" not found", HttpStatus.NOT_FOUND);
+        Order order = orderRepository.findOne(id);
+        if (order != null)
+            return new ResponseEntity(order, HttpStatus.OK);
+        else
+            return new ResponseEntity("order with id :" + id + " not found", HttpStatus.NOT_FOUND);
     }
 
     @GetMapping
@@ -68,16 +67,15 @@ import java.util.Map;
     @RequestMapping("/update")
     public ResponseEntity<Order> updateOrder(@RequestBody String body) {
         ObjectMapper mapper = new ObjectMapper();
-        try{
-            Map<String,Object> mapBody = mapper.readValue(body,Map.class);
-            Long orderId = Long.valueOf((int)mapBody.get("order_id"));
-            int quantity = (int)mapBody.get("quantity");
+        try {
+            Map<String, Object> mapBody = mapper.readValue(body, Map.class);
+            Long orderId = Long.valueOf((int) mapBody.get("order_id"));
+            int quantity = (int) mapBody.get("quantity");
             Order order = orderRepository.findOne(orderId);
             order.setQuantity(quantity);
             orderRepository.saveAndFlush(order);
             return new ResponseEntity(order, HttpStatus.OK);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity("error updating order", HttpStatus.EXPECTATION_FAILED);
         }
@@ -87,9 +85,9 @@ import java.util.Map;
     @RequestMapping("/fulfil")
     public ResponseEntity<List<Order>> fulfil(@RequestBody String body) {
         ObjectMapper mapper = new ObjectMapper();
-        try{
+        try {
             List<Order> orders = new ArrayList<>();
-            List<Integer> listBody = mapper.readValue(body,List.class);
+            List<Integer> listBody = mapper.readValue(body, List.class);
             for (Integer orderId : listBody) {
                 Order order = orderRepository.findOne(Long.valueOf(orderId));
                 order.setDispatched(true);
@@ -97,11 +95,10 @@ import java.util.Map;
                 orders.add(order);
             }
             return new ResponseEntity(orders, HttpStatus.OK);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity("error fulfilling order", HttpStatus.EXPECTATION_FAILED);
         }
     }
 
-    }
+}

@@ -44,7 +44,8 @@ public class Customer {
         this.orders = orders;
     }
 
-    public Customer() { }
+    public Customer() {
+    }
 
     public Customer(String cusName) {
         this.cusName = cusName;

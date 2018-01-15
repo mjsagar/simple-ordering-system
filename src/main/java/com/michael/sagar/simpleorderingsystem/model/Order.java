@@ -4,33 +4,33 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "sos_order")
-    public class Order {
-        @Id
-        @Column
-        @GeneratedValue(strategy = GenerationType.AUTO)
-        Long orderId;
-        Boolean dispatched;
+public class Order {
+    @Id
+    @Column
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    Long orderId;
+    Boolean dispatched;
 
     @ManyToOne
     @JoinColumn(name = "productId")
     Product product;
 
     @ManyToOne
-        @JoinColumn(name = "customerId")
-        Customer customer;
+    @JoinColumn(name = "customerId")
+    Customer customer;
 
-        int quantity;
+    int quantity;
 
-        double subtotal;
+    double subtotal;
 
 
-        public Product getProduct() {
-            return product;
-        }
+    public Product getProduct() {
+        return product;
+    }
 
-        public void setProduct(Product product) {
-            this.product = product;
-        }
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 
     public Customer getCustomer() {
         return customer;
@@ -42,40 +42,43 @@ import javax.persistence.*;
 
 
     public Long getOrderId() {
-            return orderId;
-        }
+        return orderId;
+    }
 
-        public void setOrderId(Long orderNo) {
-            this.orderId = orderId;
-        }
+    public void setOrderId(Long orderNo) {
+        this.orderId = orderId;
+    }
 
-        public int getQuantity() {
-            return quantity;
-        }
+    public int getQuantity() {
+        return quantity;
+    }
 
-        public void setQuantity(int quantity) {
-            this.quantity = quantity;
-        }
+    public void setQuantity(int quantity) {
+        this.subtotal = this.product.unitPrice * quantity;
+        this.quantity = quantity;
+    }
 
-        public double getSubtotal() {
-            return subtotal;
-        }
+    public double getSubtotal() {
+        return subtotal;
+    }
 
-        public void setSubtotal(double subtotal) {
-            this.subtotal = subtotal;
-        }
+    public Boolean getDispatched() {
+        return dispatched;
+    }
 
-        public Boolean getDispatched(){ return dispatched; }
+    public void setDispatched(Boolean dispatched) {
+        this.dispatched = dispatched;
+    }
 
-        public void setDispatched(Boolean dispatched){ this.dispatched = dispatched; }
-
-    public Order() {}
+    public Order() {
+    }
 
     public Order(Customer customer, Product product, int quantity) {
         this.customer = customer;
         this.product = product;
         this.quantity = quantity;
-        this.subtotal = product.unitPrice*quantity;
+        this.subtotal = product.unitPrice * quantity;
+        this.dispatched = false;
     }
 
 }
