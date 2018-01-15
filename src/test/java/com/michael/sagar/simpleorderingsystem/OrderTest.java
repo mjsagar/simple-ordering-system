@@ -1,5 +1,11 @@
 package com.michael.sagar.simpleorderingsystem;
 
+import com.michael.sagar.simpleorderingsystem.model.Customer;
+import com.michael.sagar.simpleorderingsystem.model.Order;
+import com.michael.sagar.simpleorderingsystem.model.Product;
+import com.michael.sagar.simpleorderingsystem.repository.CustomerRepository;
+import com.michael.sagar.simpleorderingsystem.repository.OrderRepository;
+import com.michael.sagar.simpleorderingsystem.repository.ProductRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -27,6 +34,16 @@ public class OrderTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ProductRepository productRepositoryTest;
+
+    @Autowired
+    private CustomerRepository customerRepositoryTest;
+
+    @Autowired
+    private OrderRepository orderRepositoryTest;
+
+
 
     // setting up customer
     private Customer customer1;
@@ -37,10 +54,14 @@ public class OrderTest {
     // setting up product for the customer to buy
     private Order order1;
 
+    //Stage 1 tests
+
     @Before
     public void setup(){
         customer1 = new Customer("cus1");
+        customerRepositoryTest.saveAndFlush(customer1);
         product1 = new Product("brick1", "red brick", 0.95);
+        productRepositoryTest.saveAndFlush(product1);
     }
 
     @Test
@@ -48,18 +69,17 @@ public class OrderTest {
 
         //Given - a customer wants to buy any number of bricks
         try {
-
             //when  - a create order request for a number of bricks is submitted
 
             //posting to /api/order/create with JSON order details
             ResultActions mockMvc1 = this.mockMvc.perform(post("/api/order/create")
                     // adding a JSON string to the request
-                    .content("{\"customer_id\":" + cus1.getCustomerId() + ",\"product_name\":\""
+                    .content("{\"customer_id\":" + customer1.getCustomerId() + ",\"product_name\":\""
                             + product1.getProductName() + "\",\"quantity\":150}")
                     .contentType(MediaType.APPLICATION_JSON));
             mockMvc1.andDo(print()).andExpect(status().isOk());
             // then - an order reference is returned and is unique to submission
-            mockMvc1.andExpect(jsonPath("$.orderId").value(anyInt()));
+            mockMvc1.andExpect(jsonPath("$.orderId").value(1));
         }
         catch(Exception e){
             e.printStackTrace();
@@ -68,6 +88,7 @@ public class OrderTest {
 
     private void setupOrder(){
         order1 = new Order(customer1, product1, 150);
+        orderRepositoryTest.saveAndFlush(order1);
     }
 
     @Test
@@ -78,7 +99,7 @@ public class OrderTest {
             //when  - an order request is submitted with a valid reference
             setupOrder();
             //posting to /api/order/get with JSON order details
-            ResultActions mockMvc1 = this.mockMvc.perform(get("/api/order/get/id/"+order.getOrderId()));
+            ResultActions mockMvc1 = this.mockMvc.perform(get("/api/order/get/id/"+order1.getOrderId()));
             mockMvc1.andDo(print()).andExpect(status().isOk());
             // then - an order reference is returned and is unique to submission
             mockMvc1.andExpect(jsonPath("$.quantity").value(order1.getQuantity()));
@@ -91,8 +112,8 @@ public class OrderTest {
     private void createTenOrdersWithDifferentCustomers(){
 
         for (int i = 0; i < 10 ; i++) {
-            new Customer("customer"+i);
-            new Order(customer1, product1, i*5);
+            Customer tempCustomer = customerRepositoryTest.saveAndFlush(new Customer("customer"+i));
+            orderRepositoryTest.saveAndFlush(new Order(tempCustomer, product1, i*5));
         }
     }
 
@@ -102,16 +123,44 @@ public class OrderTest {
         createTenOrdersWithDifferentCustomers();
         //Given - Many customer have submitted orders for bricks
         try {
-            //when  - a get orders request is cubmitted
+            //when  - a get orders request is submitted
             setupOrder();
             //posting to /api/order/get/all to retrive all orders
             ResultActions mockMvc1 = this.mockMvc.perform(get("/api/order/get/all"));
             mockMvc1.andDo(print()).andExpect(status().isOk());
             //then all orders have reference and quantity
             for (int i = 0; i < 10 ; i++) {
-                mockMvc1.andExpect(jsonPath("$["+i+"].orderId").value(anyInt()));
-                mockMvc1.andExpect(jsonPath("$["+i+"].quantity").value(anyInt()));
+                mockMvc1.andExpect(jsonPath("$["+i+"].orderId").value(i+1));
+                mockMvc1.andExpect(jsonPath("$["+i+"].quantity").exists());
             }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    // stage 2 tests
+
+    @Test
+    public void update_quantity_in_order_by_id() {
+
+        //Given - A customer has ordered a number of bricks
+        try {
+            //when  - a update order request for an exsiting order reference and number of bricks is submitted
+            Order orderToUpdate = new Order(customer1,product1,100);
+            orderRepositoryTest.saveAndFlush(orderToUpdate);
+
+            //posting to /api/order/update with JSON order details
+            ResultActions mockMvc1 = this.mockMvc.perform(post("/api/order/update")
+                    // adding a JSON string to the request
+                    .content("{\"order_id\":" + orderToUpdate.getOrderId() + "\",\"quantity\":150}")
+                    .contentType(MediaType.APPLICATION_JSON));
+            mockMvc1.andDo(print()).andExpect(status().isOk());
+            // then - an orderReference is returned with order reference that is unique to the submission
+            mockMvc1.andExpect(jsonPath("$.orderId").value(orderToUpdate.getOrderId()));
+            // checking the new quantity is correct
+            mockMvc1.andExpect(jsonPath("$.quantity").value(150));
+
         }
         catch(Exception e){
             e.printStackTrace();
