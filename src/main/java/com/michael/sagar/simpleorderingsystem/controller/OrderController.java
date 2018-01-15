@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +80,27 @@ import java.util.Map;
         catch(Exception e){
             e.printStackTrace();
             return new ResponseEntity("error updating order", HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping
+    @RequestMapping("/fulfil")
+    public ResponseEntity<List<Order>> fulfil(@RequestBody String body) {
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            List<Order> orders = new ArrayList<>();
+            List<Integer> listBody = mapper.readValue(body,List.class);
+            for (Integer orderId : listBody) {
+                Order order = orderRepository.findOne(Long.valueOf(orderId));
+                order.setDispatched(true);
+                orderRepository.saveAndFlush(order);
+                orders.add(order);
+            }
+            return new ResponseEntity(orders, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity("error fulfilling order", HttpStatus.EXPECTATION_FAILED);
         }
     }
 

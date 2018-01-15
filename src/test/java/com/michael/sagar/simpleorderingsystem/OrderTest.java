@@ -172,14 +172,14 @@ public class OrderTest {
 
             //posting to /api/order/fulfil with JSON order details
             ResultActions mockMvc1 = this.mockMvc.perform(post("/api/order/fulfil")
-                    // adding a JSON string to the request -  deccided to make this a JSON list of ids
-                    .content("[{\"order_id\":" + orderToUpdate.getOrderId()+"}]")
+                    // adding a JSON string to the request -  decided to make this a JSON list of ids
+                    .content("["+orderToUpdate.getOrderId()+"]")
                     .contentType(MediaType.APPLICATION_JSON));
             mockMvc1.andDo(print()).andExpect(status().isOk());
             // then - the order is marked as dispatched
-            mockMvc1.andExpect(jsonPath("$.orderId").value(orderToUpdate.getOrderId()));
-            // checking the new quantity is correct
-            mockMvc1.andExpect(jsonPath("$.quantity").value(150));
+            mockMvc1.andExpect(jsonPath("$[0].orderId").value(orderToUpdate.getOrderId()));
+            // checking that dispatched is true
+            mockMvc1.andExpect(jsonPath("$[0].dispatched").value(true));
 
             Order updatedOrder = orderRepositoryTest.findOne(orderToUpdate.getOrderId());
             assert updatedOrder.getDispatched()==true;

@@ -9,6 +9,7 @@ import javax.persistence.*;
         @Column
         @GeneratedValue(strategy = GenerationType.AUTO)
         Long orderId;
+        Boolean dispatched;
 
     @ManyToOne
     @JoinColumn(name = "productId")
@@ -63,6 +64,10 @@ import javax.persistence.*;
         public void setSubtotal(double subtotal) {
             this.subtotal = subtotal;
         }
+
+        public Boolean getDispatched(){ return dispatched; }
+
+        public void setDispatched(Boolean dispatched){ this.dispatched = dispatched; }
 
     public Order() {}
 
