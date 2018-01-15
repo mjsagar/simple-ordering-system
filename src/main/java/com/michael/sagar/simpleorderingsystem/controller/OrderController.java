@@ -63,4 +63,23 @@ import java.util.Map;
         return new ResponseEntity(orders, HttpStatus.OK);
     }
 
+    @GetMapping
+    @RequestMapping("/update")
+    public ResponseEntity<Order> updateOrder(@RequestBody String body) {
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            Map<String,Object> mapBody = mapper.readValue(body,Map.class);
+            Long orderId = Long.valueOf((int)mapBody.get("order_id"));
+            int quantity = (int)mapBody.get("quantity");
+            Order order = orderRepository.findOne(orderId);
+            order.setQuantity(quantity);
+            orderRepository.saveAndFlush(order);
+            return new ResponseEntity(order, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity("error updating order", HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     }
