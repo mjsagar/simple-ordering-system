@@ -72,6 +72,8 @@ public class OrderController {
             Long orderId = Long.valueOf((int) mapBody.get("order_id"));
             int quantity = (int) mapBody.get("quantity");
             Order order = orderRepository.findOne(orderId);
+            if(order.getDispatched())
+                return new ResponseEntity("order already dispatched", HttpStatus.BAD_REQUEST);
             order.setQuantity(quantity);
             orderRepository.saveAndFlush(order);
             return new ResponseEntity(order, HttpStatus.OK);
