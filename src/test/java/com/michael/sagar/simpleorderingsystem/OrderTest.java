@@ -84,7 +84,7 @@ public class OrderTest {
         //Given - A customer has submitted an order for some bricks
         try {
             //when  - an order request is submitted with a valid reference
-            Order order1 = order1 = new Order(customer1, product1, 150);
+            Order order1 = new Order(customer1, product1, 150);
             orderRepositoryTest.saveAndFlush(order1);
             //posting to /api/order/get with JSON order details
             ResultActions mockMvc1 = this.mockMvc.perform(get("/api/order/get/id/" + order1.getOrderId()));
@@ -174,7 +174,7 @@ public class OrderTest {
             mockMvc1.andExpect(jsonPath("$[0].dispatched").value(true));
 
             Order updatedOrder = orderRepositoryTest.findOne(orderToUpdate.getOrderId());
-            assert updatedOrder.getDispatched() == true;
+            assert updatedOrder.getDispatched();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -193,12 +193,11 @@ public class OrderTest {
             orderRepositoryTest.saveAndFlush(orderToUpdate);
 
             //posting to /api/order/update with JSON order details
-            ResultActions mockMvc1 = this.mockMvc.perform(post("/api/update")
+            ResultActions mockMvc1 = this.mockMvc.perform(post("/api/order/update")
                     // adding a JSON string to the request to try and update the quantity
                     .content("{\"order_id\":" + orderToUpdate.getOrderId() + ",\"quantity\":150}")
                     .contentType(MediaType.APPLICATION_JSON));
             mockMvc1.andDo(print()).andExpect(status().isBadRequest());
-
 
         } catch (Exception e) {
             e.printStackTrace();

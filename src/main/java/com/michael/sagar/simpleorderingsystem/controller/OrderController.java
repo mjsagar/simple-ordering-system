@@ -43,7 +43,7 @@ public class OrderController {
             //reading the JSON body
             Map<String, Object> mapBody = mapper.readValue(body, Map.class);
             //pulling the customer_id from the JSON body
-            Long cusId = Long.valueOf((int) mapBody.get("customer_id"));
+            Long cusId = (long) (int) mapBody.get("customer_id");
             //using JPA to find the customer instance
             Customer customer = customerRepository.findOne(cusId);
             //using JPA to find the customers name by product name
@@ -107,7 +107,7 @@ public class OrderController {
             //parsing the JSON body
             Map<String, Object> mapBody = mapper.readValue(body, Map.class);
             //extracting the order_id from the JOSN body
-            Long orderId = Long.valueOf((int) mapBody.get("order_id"));
+            Long orderId = (long)(int) mapBody.get("order_id");
             //using JPA to find the Order
             Order order = orderRepository.findOne(orderId);
             //checking if the order has previously been dispatched. If it has then returns BAD REQUEST
